@@ -2,9 +2,9 @@
 
 public static class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var facade = new Facade();
-        facade.Start();
+        await facade.Start();
     }
 }

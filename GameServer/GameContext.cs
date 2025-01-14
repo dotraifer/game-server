@@ -5,7 +5,7 @@ namespace GameServer;
 /// <summary>
 /// Represents the game context which holds the logger and player state service.
 /// </summary>
-public class GameContext
+public class GameContext : IGameContext
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="GameContext"/> class.
@@ -17,14 +17,8 @@ public class GameContext
         Logger = logger;
         PlayerStateService = playerStateService;
     }
-
-    /// <summary>
-    /// Gets the logger instance.
-    /// </summary>
+    
     public ILogger Logger { get; init; }
-
-    /// <summary>
-    /// Gets or sets the player state service instance.
-    /// </summary>
+    
     public PlayerStateService PlayerStateService { get; set; }
 }

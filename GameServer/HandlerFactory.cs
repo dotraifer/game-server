@@ -17,7 +17,7 @@ public static class HandlerFactory
     /// <param name="gameContext">The game context containing shared resources like logger and player state service.</param>
     /// <returns>An instance of a class that implements the <see cref="IHandler"/> interface.</returns>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when the action type is not recognized.</exception>
-    public static IHandler CreateObject(string message, GameContext gameContext)
+    public static IHandler CreateObject(string message, IGameContext gameContext)
     {
         var json = JsonDocument.Parse(message);
         var typeString = json.RootElement.GetProperty("ActionType").GetInt32();

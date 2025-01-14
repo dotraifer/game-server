@@ -1,13 +1,19 @@
 using System.Net;
 using System.Net.WebSockets;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace GameServer;
 
-public class GameServer(GameContext gameContext)
+/// <summary>
+/// Represents the game server that handles incoming connections and processes WebSocket requests.
+/// </summary>
+public class GameServer(IGameContext gameContext)
 {
+    /// <summary>
+    /// Starts the game server and listens for incoming connections.
+    /// </summary>
+    /// <param name="ipAddress">The IP address to bind the server to.</param>
+    /// <param name="port">The port to bind the server to.</param>
     public async Task StartServer(string ipAddress, int port)
     {
         var listener = new HttpListener();
@@ -31,6 +37,10 @@ public class GameServer(GameContext gameContext)
         }
     }
 
+    /// <summary>
+    /// Processes an incoming WebSocket request.
+    /// </summary>
+    /// <param name="context">The HTTP listener context containing the WebSocket request.</param>
     private async Task ProcessWebSocketRequest(HttpListenerContext context)
     {
         var webSocketContext = await context.AcceptWebSocketAsync(null);
@@ -53,8 +63,14 @@ public class GameServer(GameContext gameContext)
         }
     }
 
+    /// <summary>
+    /// Processes a received message and returns a response.
+    /// </summary>
+    /// <param name="message">The received message to process.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the processed message response.</returns>
     private async Task<string> ProcessMessageAsync(string message)
     {
+        Console.WriteLine("CKDSC");
         try
         {
             var handler = HandlerFactory.CreateObject(message, gameContext);

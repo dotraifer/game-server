@@ -10,7 +10,7 @@ namespace GameServer.Handlers;
 /// <param name="request">The request containing the details of the gift to be sent.</param>
 /// <param name="gameContext">The game context containing shared resources like logger and player state service.</param>
 public class LoginHandler(LoginRequest request,
-    GameContext gameContext) : IHandler
+    IGameContext gameContext) : IHandler
 {
     public Task<string> HandleAsync()
     {

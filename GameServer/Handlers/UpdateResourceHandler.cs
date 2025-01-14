@@ -10,7 +10,7 @@ namespace GameServer.Handlers;
 /// <param name="request">The update resource request.</param>
 /// <param name="gameContext">The game context containing shared resources like logger and player state service.</param>
 public class UpdateResourceHandler(UpdateResourceRequest request,
-    GameContext gameContext) : IHandler
+    IGameContext gameContext) : IHandler
 {
     public Task<string> HandleAsync()
     {

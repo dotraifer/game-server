@@ -6,7 +6,7 @@ namespace GameServer;
 
 public class Facade
 {
-    public async void Start()
+    public async Task Start()
     {
         var builder = new ContainerBuilder();
         
@@ -22,7 +22,7 @@ public class Facade
         builder.RegisterType<GameServer>().AsSelf();
         builder.RegisterInstance(playerStateService).
             As<IPlayerStateService>().SingleInstance();
-        builder.RegisterInstance(new GameContext(logger, playerStateService)).AsSelf().SingleInstance();
+        builder.RegisterInstance(new GameContext(logger, playerStateService)).As<IGameContext>().SingleInstance();
         var container = builder.Build();
         await using var scope = container.BeginLifetimeScope();
         await container.Resolve<GameServer>().StartServer("127.0.0.1", 8000);
