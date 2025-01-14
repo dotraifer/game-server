@@ -1,4 +1,5 @@
 using System.Net.WebSockets;
+using GameServer.Models;
 
 namespace GameServer;
 
@@ -50,4 +51,6 @@ public interface IPlayerStateService
     /// <param name="resourceValue">The value to update the resource by.</param>
     /// <returns>The updated resource value.</returns>
     int UpdateResources(string playerId, string resourceType, int resourceValue);
+    
+    Player GetPlayerById(string playerId);
 }

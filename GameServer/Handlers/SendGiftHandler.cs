@@ -2,6 +2,7 @@ using System.Text.Json;
 using GameServer.Models;
 using GameServer.Requests;
 using GameServer.Responses;
+using Serilog;
 
 namespace GameServer.Handlers;
 
@@ -9,12 +10,14 @@ namespace GameServer.Handlers;
 /// Handles the request to send a gift from one player to another.
 /// </summary>
 /// <param name="request">The request containing the details of the gift to be sent.</param>
-/// <param name="gameContext">The game context containing shared resources like logger and player state service.</param>
-public class SendGiftHandler(SendGiftRequest request, IGameContext gameContext) : IHandler
+/// <param name="logger">The logger instance for logging information.</param>
+/// <param name="playerStateService">The service for managing player states and connections.</param>
+public class SendGiftHandler(SendGiftRequest request, ILogger logger, 
+    IPlayerStateService playerStateService) : IHandler
 {
     public async Task<string> HandleAsync()
     {
-        gameContext.Logger.Information($"Handling gift request from Player {request.PlayerId} to Player {request.FriendPlayerId}.");
+        logger.Information($"Handling gift request from Player {request.PlayerId} to Player {request.FriendPlayerId}.");
 
         SendGift(request.PlayerId, request.FriendPlayerId, request.ResourceType, request.Amount);
 
@@ -27,7 +30,7 @@ public class SendGiftHandler(SendGiftRequest request, IGameContext gameContext) 
         };
 
         var json = JsonSerializer.Serialize(response);
-        gameContext.Logger.Information($"Gift response: {json}");
+        logger.Information($"Gift response: {json}");
 
         return await Task.FromResult(json);
     }
@@ -42,19 +45,19 @@ public class SendGiftHandler(SendGiftRequest request, IGameContext gameContext) 
     /// <exception cref="Exception">Thrown when the sender or recipient is not found or when there are insufficient resources.</exception>
     private void SendGift(string senderPlayerId, string recipientPlayerId, ResourceType resourceType, int resourceValue)
     {
-        var sender = gameContext.PlayerStateService.GetPlayerById(senderPlayerId);
-        var recipient = gameContext.PlayerStateService.GetPlayerById(recipientPlayerId);
+        var sender = playerStateService.GetPlayerById(senderPlayerId);
+        var recipient = playerStateService.GetPlayerById(recipientPlayerId);
 
         if (sender == null || recipient == null)
         {
-            gameContext.Logger.Error("Sender or recipient not found.");
+            logger.Error("Sender or recipient not found.");
             throw new Exception("Sender or recipient not found.");
         }
 
         if ((resourceType == ResourceType.Coins && sender.Coins < resourceValue) ||
             (resourceType == ResourceType.Rolls && sender.Rolls < resourceValue))
         {
-            gameContext.Logger.Error("Insufficient resources.");
+            logger.Error("Insufficient resources.");
             throw new Exception("Insufficient resources.");
         }
 
@@ -69,10 +72,10 @@ public class SendGiftHandler(SendGiftRequest request, IGameContext gameContext) 
             recipient.Rolls += resourceValue;
         }
 
-        gameContext.Logger.Information(
+        logger.Information(
             $"Gift sent from Player {senderPlayerId} to Player {recipientPlayerId}. Resource: {resourceType}, Value: {resourceValue}.");
 
-        if (gameContext.PlayerStateService.IsPlayerOnline(recipientPlayerId))
+        if (playerStateService.IsPlayerOnline(recipientPlayerId))
         {
             var notification = new
             {
@@ -83,8 +86,8 @@ public class SendGiftHandler(SendGiftRequest request, IGameContext gameContext) 
             };
 
             var jsonNotification = JsonSerializer.Serialize(notification);
-            gameContext.PlayerStateService.SendNotificationToPlayer(recipientPlayerId, jsonNotification);
-            gameContext.Logger.Information($"Notification sent to Player {recipientPlayerId}: {jsonNotification}");
+            playerStateService.SendNotificationToPlayer(recipientPlayerId, jsonNotification);
+            logger.Information($"Notification sent to Player {recipientPlayerId}: {jsonNotification}");
         }
     }
 }

@@ -1,26 +1,28 @@
 using System.Text.Json;
 using GameServer.Requests;
 using GameServer.Responses;
+using Serilog;
 
 namespace GameServer.Handlers;
 
 /// <summary>
-/// Handles the request to send a gift from one player to another.
+/// Handles the login request for a player.
 /// </summary>
-/// <param name="request">The request containing the details of the gift to be sent.</param>
-/// <param name="gameContext">The game context containing shared resources like logger and player state service.</param>
+/// <param name="request">The request containing the device ID of the player.</param>
+/// <param name="logger">The logger instance for logging information.</param>
+/// <param name="playerStateService">The service for managing player states and connections.</param>
 public class LoginHandler(LoginRequest request,
-    IGameContext gameContext) : IHandler
+    ILogger logger, IPlayerStateService playerStateService) : IHandler
 {
     public Task<string> HandleAsync()
     {
         var deviceId = request.DeviceId;
-        if (gameContext.PlayerStateService.IsPlayerConnected(deviceId.ToString()))
+        if (playerStateService.IsPlayerConnected(deviceId.ToString()))
         {
             return Task.FromResult("Player already connected.");
         }
 
-        var playerId = gameContext.PlayerStateService.ConnectPlayer(deviceId.ToString());
+        var playerId = playerStateService.ConnectPlayer(deviceId.ToString());
         var response = new LoginResponse
         {
             PlayerId = playerId

@@ -1,13 +1,14 @@
 using System.Net;
 using System.Net.WebSockets;
 using System.Text;
+using Serilog;
 
 namespace GameServer;
 
 /// <summary>
 /// Represents the game server that handles incoming connections and processes WebSocket requests.
 /// </summary>
-public class GameServer(IGameContext gameContext)
+public class GameServer(ILogger logger, IPlayerStateService playerStateService)
 {
     /// <summary>
     /// Starts the game server and listens for incoming connections.
@@ -20,7 +21,7 @@ public class GameServer(IGameContext gameContext)
         listener.Prefixes.Add($"http://{ipAddress}:{port}/");
         listener.Start();
 
-        gameContext.Logger.Information("Server started. Waiting for connections at {IpAddress}:{Port}",
+        logger.Information("Server started. Waiting for connections at {IpAddress}:{Port}",
             ipAddress, port);
 
         while (true)
@@ -28,12 +29,12 @@ public class GameServer(IGameContext gameContext)
             var context = await listener.GetContextAsync();
             if (context.Request.IsWebSocketRequest)
             {
-                gameContext.Logger.Information("WebSocket request received.");
+                logger.Information("WebSocket request received.");
                 await ProcessWebSocketRequest(context);
             }
             else
             {
-                gameContext.Logger.Warning("Non-WebSocket request received. Responding with 400 Bad Request.");
+                logger.Warning("Non-WebSocket request received. Responding with 400 Bad Request.");
                 context.Response.StatusCode = 400;
                 context.Response.Close();
             }
@@ -46,7 +47,7 @@ public class GameServer(IGameContext gameContext)
     /// <param name="context">The HTTP listener context containing the WebSocket request.</param>
     private async Task ProcessWebSocketRequest(HttpListenerContext context)
     {
-        gameContext.Logger.Information("WebSocket connection established.");
+        logger.Information("WebSocket connection established.");
         var webSocketContext = await context.AcceptWebSocketAsync(null);
         var socket = webSocketContext.WebSocket;
         var buffer = new byte[1024];
@@ -63,7 +64,7 @@ public class GameServer(IGameContext gameContext)
             else if (result.MessageType == WebSocketMessageType.Close)
             {
                 await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
-                gameContext.Logger.Information("WebSocket connection closed.");
+                logger.Information("WebSocket connection closed.");
             }
         }
     }
@@ -77,12 +78,12 @@ public class GameServer(IGameContext gameContext)
     {
         try
         {
-            var handler = HandlerFactory.CreateObject(message, gameContext);
+            var handler = HandlerFactory.CreateObject(message, logger, playerStateService);
             return await handler.HandleAsync();
         }
         catch (Exception ex)
         {
-            gameContext.Logger.Error("Error processing message.", ex);
+            logger.Error("Error processing message.", ex);
             return $"Error processing message. {ex.Message}";
         }
     }
