@@ -4,19 +4,27 @@ using System.Text.Json;
 using GameServer.Models;
 using GameServer.Requests;
 using GameServer.Responses;
+using Serilog;
 
 namespace GameClient;
 
 public static class Program
 {
+    private const string ServerUrl = "ws://127.0.0.1:8000/";
     public static async Task Main(string[] args)
     {
+        var logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.File("logs/GameServer.logs", rollingInterval: RollingInterval.Day)
+            .MinimumLevel.Information()
+            .CreateLogger();
+        
         var clientWebSocket = new ClientWebSocket();
+        logger.Information("Attempting to connect to the server at {ServerUrl}...", ServerUrl);
         // Connect to the server
-        await clientWebSocket.ConnectAsync(new Uri("ws://127.0.0.1:8000/"), CancellationToken.None);
+        await clientWebSocket.ConnectAsync(new Uri(ServerUrl), CancellationToken.None);
 
-        Console.WriteLine("Connected to the server. Start sending messages...");
-
+        logger.Information("Connected to the server. Start sending messages on {ServerUrl}...", ServerUrl);
         var loginRequest = new LoginRequest
         {
             ActionType = ActionType.Login,
@@ -25,8 +33,10 @@ public static class Program
         
         // Send login request
         await SendMessageAsync(clientWebSocket, loginRequest);
+        logger.Information("Login request sent: {LoginRequest}", loginRequest);
         // Receive login response
-        var loginResponse = await ReceiveMessageAsync<LoginResponse>(clientWebSocket);
+        var loginResponse = await ReceiveMessageAsync<LoginResponse>(clientWebSocket, logger);
+        logger.Information("Login response received: {LoginResponse}", loginResponse);
         var playerId = loginResponse.PlayerId;
 
         var friendLoginRequest = new LoginRequest
@@ -36,9 +46,11 @@ public static class Program
         };
 
         // Send friend login request
+        logger.Information("Login request sent: {LoginRequest}", loginRequest);
         await SendMessageAsync(clientWebSocket, friendLoginRequest);
         // Receive friend login response
-        var friendLoginResponse = await ReceiveMessageAsync<LoginResponse>(clientWebSocket);
+        var friendLoginResponse = await ReceiveMessageAsync<LoginResponse>(clientWebSocket, logger);
+        logger.Information("Login response received: {LoginResponse}", loginResponse);
         var friendPlayerId = friendLoginResponse.PlayerId;
 
         var updateRequest = new UpdateResourceRequest
@@ -51,8 +63,10 @@ public static class Program
 
         // Send update resource request
         await SendMessageAsync(clientWebSocket, updateRequest);
+        logger.Information("Update resource request sent: {UpdateRequest}", updateRequest);
         // Receive update resource response
-        await ReceiveMessageAsync<UpdateResourceResponse>(clientWebSocket);
+        await ReceiveMessageAsync<UpdateResourceResponse>(clientWebSocket, logger);
+        logger.Information("Update resource response received.");
 
         var sendGiftRequest = new SendGiftRequest
         {
@@ -65,10 +79,13 @@ public static class Program
         
         // Send gift request
         await SendMessageAsync(clientWebSocket, sendGiftRequest);
+        logger.Information("Send gift request sent: {SendGiftRequest}", sendGiftRequest);
         // Receive gift response
-        await ReceiveMessageAsync<SendGiftResponse>(clientWebSocket);
+        await ReceiveMessageAsync<SendGiftResponse>(clientWebSocket, logger);
+        logger.Information("Send gift response received.");
         // Close the connection
         await clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
+        logger.Information("Connection closed.");
     }
     
     /// <summary>
@@ -87,14 +104,15 @@ public static class Program
     /// </summary>
     /// <typeparam name="T">The type of the message to be received.</typeparam>
     /// <param name="clientWebSocket">The client WebSocket instance.</param>
+    /// <param name="logger"></param>
     /// <returns>The received message deserialized to the specified type.</returns>
     /// <exception cref="NotSupportedException">Thrown when the message cannot be deserialized.</exception>
-    private static async Task<T> ReceiveMessageAsync<T>(ClientWebSocket clientWebSocket)
+    private static async Task<T> ReceiveMessageAsync<T>(ClientWebSocket clientWebSocket, ILogger logger)
     {
         var receiveBuffer = new byte[1024];
         var result = await clientWebSocket.ReceiveAsync(new ArraySegment<byte>(receiveBuffer), CancellationToken.None);
         var receivedMessage = Encoding.UTF8.GetString(receiveBuffer, 0, result.Count);
-        Console.WriteLine($"Received message from server: {receivedMessage}");
+        logger.Information("Received message from server: {ReceivedMessage}", receivedMessage);
         return JsonSerializer.Deserialize<T>(new ReadOnlySpan<byte>(receiveBuffer, 0, result.Count))
                ?? throw new NotSupportedException("Failed to deserialize message.");
     }
