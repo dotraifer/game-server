@@ -21,19 +21,7 @@ public class SendGiftHandler(SendGiftRequest request, ILogger logger,
         logger.Information($"Handling gift request from Player {request.PlayerId} to Player {request.FriendPlayerId}.");
 
         SendGift(request.PlayerId, request.FriendPlayerId, request.ResourceType, request.Amount);
-
-        var response = new SendGiftResponse
-        {
-            PlayerId = request.PlayerId,
-            FriendPlayerId = request.FriendPlayerId,
-            Amount = request.Amount,
-            ResourceType = request.ResourceType
-        };
-
-        var json = JsonSerializer.Serialize(response);
-        logger.Information($"Gift response: {json}");
-
-        return await Task.FromResult(json);
+        return await Task.FromResult(string.Empty);
     }
 
     /// <summary>
@@ -78,12 +66,12 @@ public class SendGiftHandler(SendGiftRequest request, ILogger logger,
 
         if (playerStateService.IsPlayerOnline(recipientPlayerId))
         {
-            var notification = new
+            var notification = new SendGiftResponse
             {
-                Type = "GiftEvent",
-                From = senderPlayerId,
-                ResourceType = resourceType,
-                ResourceValue = resourceValue
+                PlayerId = senderPlayerId,
+                FriendPlayerId = recipientPlayerId,
+                Amount = resourceValue,
+                ResourceType = resourceType
             };
 
             var jsonNotification = JsonSerializer.Serialize(notification);

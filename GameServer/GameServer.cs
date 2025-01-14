@@ -57,7 +57,7 @@ public class GameServer(ILogger logger, IPlayerStateService playerStateService, 
             if (result.MessageType == WebSocketMessageType.Text)
             {
                 var receivedMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                var processedMessage = await ProcessMessageAsync(receivedMessage);
+                var processedMessage = await ProcessMessageAsync(receivedMessage, socket);
                 await socket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(processedMessage)), WebSocketMessageType.Text, true, CancellationToken.None);
             }
             else if (result.MessageType == WebSocketMessageType.Close)
@@ -72,12 +72,13 @@ public class GameServer(ILogger logger, IPlayerStateService playerStateService, 
     /// Processes a received message and returns a response.
     /// </summary>
     /// <param name="message">The received message to process.</param>
+    /// <param name="webSocket">The WebSocket instance for sending responses.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the processed message response.</returns>
-    private async Task<string> ProcessMessageAsync(string message)
+    private async Task<string> ProcessMessageAsync(string message, WebSocket webSocket)
     {
         try
         {
-            var handler = HandlerFactory.CreateObject(message, logger, playerStateService);
+            var handler = HandlerFactory.CreateObject(message, logger, playerStateService, webSocket);
             return await handler.HandleAsync();
         }
         catch (Exception ex)

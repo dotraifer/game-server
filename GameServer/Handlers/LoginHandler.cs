@@ -1,3 +1,4 @@
+using System.Net.WebSockets;
 using System.Text.Json;
 using GameServer.Requests;
 using GameServer.Responses;
@@ -12,7 +13,7 @@ namespace GameServer.Handlers;
 /// <param name="logger">The logger instance for logging information.</param>
 /// <param name="playerStateService">The service for managing player states and connections.</param>
 public class LoginHandler(LoginRequest request,
-    ILogger logger, IPlayerStateService playerStateService) : IHandler
+    ILogger logger, IPlayerStateService playerStateService, WebSocket webSocket) : IHandler
 {
     /// <inheritdoc/>
     public Task<string> HandleAsync()
@@ -31,6 +32,7 @@ public class LoginHandler(LoginRequest request,
         };
         
         var json = JsonSerializer.Serialize(response);
+        playerStateService.AddOnlinePlayer(playerId, webSocket);
         logger.Information($"Login request for device ID {request.DeviceId} handled successfully.");
         
         return Task.FromResult(json);

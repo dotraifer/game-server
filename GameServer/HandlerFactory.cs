@@ -1,3 +1,4 @@
+using System.Net.WebSockets;
 using System.Text.Json;
 using GameServer.Handlers;
 using GameServer.Models;
@@ -17,9 +18,11 @@ public static class HandlerFactory
     /// <param name="message">The JSON message containing the action type and request data.</param>
     /// <param name="logger">The logger instance for logging information and errors.</param>
     /// <param name="playerStateService">The player state service for managing player states and connections.</param>
+    /// <param name="webSocket">The WebSocket connection of the player.</param>
     /// <returns>An instance of a class that implements the <see cref="IHandler"/> interface.</returns>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when the action type is not recognized.</exception>
-    public static IHandler CreateObject(string message, ILogger logger, IPlayerStateService playerStateService)
+    public static IHandler CreateObject(string message, ILogger logger, IPlayerStateService playerStateService,
+        WebSocket webSocket)
     {
         var json = JsonDocument.Parse(message);
         // Get the action type from the message.
@@ -32,7 +35,7 @@ public static class HandlerFactory
             case ActionType.Login:
                 var loginRequest = JsonSerializer.Deserialize<LoginRequest>(message,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                return new LoginHandler(loginRequest!, logger, playerStateService);
+                return new LoginHandler(loginRequest!, logger, playerStateService, webSocket);
             case ActionType.UpdateResources:
                 var updateResourceRequest = JsonSerializer.Deserialize<UpdateResourceRequest>(message,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
