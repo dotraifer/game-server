@@ -2,4 +2,4 @@
 
 ## Overview
 
-Web Sockets based game server
+A WebSocket-based game server built with C#.
