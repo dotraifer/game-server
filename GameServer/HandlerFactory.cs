@@ -15,12 +15,14 @@ public static class HandlerFactory
     /// Creates an appropriate handler object based on the action type in the message.
     /// </summary>
     /// <param name="message">The JSON message containing the action type and request data.</param>
-    /// <param name="gameContext">The game context containing shared resources like logger and player state service.</param>
+    /// <param name="logger">The logger instance for logging information and errors.</param>
+    /// <param name="playerStateService">The player state service for managing player states and connections.</param>
     /// <returns>An instance of a class that implements the <see cref="IHandler"/> interface.</returns>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when the action type is not recognized.</exception>
     public static IHandler CreateObject(string message, ILogger logger, IPlayerStateService playerStateService)
     {
         var json = JsonDocument.Parse(message);
+        // Get the action type from the message.
         var typeString = json.RootElement.GetProperty("ActionType").GetInt32();
 
         var type = (ActionType)typeString;

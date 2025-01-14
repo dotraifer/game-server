@@ -1,3 +1,4 @@
+using System.Net;
 using Autofac;
 using Serilog;
 using Serilog.Events;
@@ -15,9 +16,12 @@ public static class Facade
             .WriteTo.File("logs/GameServer.logs", rollingInterval: RollingInterval.Day)
             .MinimumLevel.Information()
             .CreateLogger();
+
+        var httpListener = new HttpListener();
         
         var playerStateService = new PlayerStateService(logger);
         builder.RegisterInstance(logger).As<ILogger>().SingleInstance();
+        builder.RegisterInstance(httpListener).AsSelf().SingleInstance();
         builder.RegisterType<GameServer>().AsSelf().SingleInstance();
         builder.RegisterInstance(playerStateService).As<IPlayerStateService>().SingleInstance();
         

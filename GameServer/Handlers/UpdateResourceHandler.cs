@@ -14,8 +14,10 @@ namespace GameServer.Handlers;
 public class UpdateResourceHandler(UpdateResourceRequest request,
     ILogger logger, IPlayerStateService playerStateService) : IHandler
 {
+    /// <inheritdoc/>
     public Task<string> HandleAsync()
     {
+        logger.Information($"Handling resource update request for Player {request.PlayerId}.");
         var resourceType = request.ResourceType.ToString();
         var resourceValue = request.Amount;
 
@@ -28,6 +30,7 @@ public class UpdateResourceHandler(UpdateResourceRequest request,
         };
         
         var json = JsonSerializer.Serialize(response);
+        logger.Information($"Resource update request for Player {request.PlayerId} handled successfully.");
         
         return Task.FromResult(json);
     }

@@ -15,6 +15,7 @@ namespace GameServer.Handlers;
 public class SendGiftHandler(SendGiftRequest request, ILogger logger, 
     IPlayerStateService playerStateService) : IHandler
 {
+    /// <inheritdoc/>
     public async Task<string> HandleAsync()
     {
         logger.Information($"Handling gift request from Player {request.PlayerId} to Player {request.FriendPlayerId}.");

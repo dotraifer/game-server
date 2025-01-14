@@ -8,5 +8,5 @@ public record LoginResponse : IServerResponse
     /// <summary>
     /// Player ID of the logged-in player.
     /// </summary>
-    public required string PlayerId { get; set; }
+    public required string PlayerId { get; init; }
 }

@@ -52,5 +52,10 @@ public interface IPlayerStateService
     /// <returns>The updated resource value.</returns>
     int UpdateResources(string playerId, string resourceType, int resourceValue);
     
+    /// <summary>
+    /// Gets a player by their player ID.
+    /// </summary>
+    /// <param name="playerId">The player ID</param>
+    /// <returns>The Player object</returns>
     Player GetPlayerById(string playerId);
 }

@@ -14,8 +14,10 @@ public class PlayerStateService(ILogger logger) : IPlayerStateService
     private readonly ConcurrentDictionary<string, Player> _players = new();
     private readonly ConcurrentDictionary<string, WebSocket> _onlinePlayers = new();
     
+    /// <inheritdoc/>
     public bool IsPlayerConnected(string deviceId) => _players.ContainsKey(deviceId);
     
+    /// <inheritdoc/>
     public string ConnectPlayer(string deviceId)
     {
         var playerId = Guid.NewGuid().ToString();
@@ -24,11 +26,13 @@ public class PlayerStateService(ILogger logger) : IPlayerStateService
         return playerId;
     }
     
+    /// <inheritdoc/>
     public void AddOnlinePlayer(string playerId, WebSocket socket)
     {
         _onlinePlayers[playerId] = socket;
     }
     
+    /// <inheritdoc/>
     public Player GetPlayerById(string playerId)
     {
         logger.Information("Fetching player with ID {PlayerId}", playerId);
@@ -42,6 +46,7 @@ public class PlayerStateService(ILogger logger) : IPlayerStateService
         return player;
     }
     
+    /// <inheritdoc/>
     public int UpdateResources(string playerId, string resourceType, int resourceValue)
     {
         var player = GetPlayerById(playerId);
@@ -58,11 +63,13 @@ public class PlayerStateService(ILogger logger) : IPlayerStateService
         return updatedValue;
     }
     
+    /// <inheritdoc/>
     public bool IsPlayerOnline(string playerId)
     {
         return _onlinePlayers.ContainsKey(playerId);
     }
     
+    /// <inheritdoc/>
     public void SendNotificationToPlayer(string playerId, string message)
     {
         if (_onlinePlayers.TryGetValue(playerId, out var socket) && socket.State == WebSocketState.Open)

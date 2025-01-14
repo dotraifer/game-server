@@ -8,7 +8,7 @@ namespace GameServer;
 /// <summary>
 /// Represents the game server that handles incoming connections and processes WebSocket requests.
 /// </summary>
-public class GameServer(ILogger logger, IPlayerStateService playerStateService)
+public class GameServer(ILogger logger, IPlayerStateService playerStateService, HttpListener httpListener)
 {
     /// <summary>
     /// Starts the game server and listens for incoming connections.
@@ -17,16 +17,15 @@ public class GameServer(ILogger logger, IPlayerStateService playerStateService)
     /// <param name="port">The port to bind the server to.</param>
     public async Task StartServer(string ipAddress, int port)
     {
-        var listener = new HttpListener();
-        listener.Prefixes.Add($"http://{ipAddress}:{port}/");
-        listener.Start();
+        httpListener.Prefixes.Add($"http://{ipAddress}:{port}/");
+        httpListener.Start();
 
         logger.Information("Server started. Waiting for connections at {IpAddress}:{Port}",
             ipAddress, port);
 
         while (true)
         {
-            var context = await listener.GetContextAsync();
+            var context = await httpListener.GetContextAsync();
             if (context.Request.IsWebSocketRequest)
             {
                 logger.Information("WebSocket request received.");

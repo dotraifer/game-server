@@ -14,8 +14,10 @@ namespace GameServer.Handlers;
 public class LoginHandler(LoginRequest request,
     ILogger logger, IPlayerStateService playerStateService) : IHandler
 {
+    /// <inheritdoc/>
     public Task<string> HandleAsync()
     {
+        logger.Information($"Handling login request for device ID {request.DeviceId}.");
         var deviceId = request.DeviceId;
         if (playerStateService.IsPlayerConnected(deviceId.ToString()))
         {
@@ -29,6 +31,7 @@ public class LoginHandler(LoginRequest request,
         };
         
         var json = JsonSerializer.Serialize(response);
+        logger.Information($"Login request for device ID {request.DeviceId} handled successfully.");
         
         return Task.FromResult(json);
     }
