@@ -1,4 +1,3 @@
-using System.Net.WebSockets;
 using System.Text.Json;
 using GameServer.Requests;
 using GameServer.Responses;

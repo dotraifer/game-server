@@ -19,12 +19,12 @@ public static class Program
             .CreateLogger();
         
         builder.RegisterInstance(logger).As<ILogger>().SingleInstance();
-        builder.RegisterType<global::GameServer.GameServer>().AsSelf();
+        builder.RegisterType<GameServer>().AsSelf();
         builder.RegisterInstance(playerStateService).
             As<IPlayerStateService>().SingleInstance();
         builder.RegisterInstance(new GameContext(logger, playerStateService)).AsSelf().SingleInstance();
         var container = builder.Build();
         await using var scope = container.BeginLifetimeScope();
-        await container.Resolve<global::GameServer.GameServer>().StartServer("127.0.0.1", 8000);
+        await container.Resolve<GameServer>().StartServer("127.0.0.1", 8000);
     }
 }

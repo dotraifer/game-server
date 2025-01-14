@@ -1,13 +1,11 @@
-﻿using System;
-using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using GameServer;
 using GameServer.Models;
 using GameServer.Requests;
 using GameServer.Responses;
+
+namespace GameClient;
 
 public static class Program
 {

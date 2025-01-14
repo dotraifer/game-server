@@ -2,8 +2,8 @@ namespace GameServer.Models;
 
 public class Player
 {
-    public string PlayerId { get; set; }
-    public string DeviceId { get; set; }
-    public int Coins { get; set; }
-    public int Rolls { get; set; }
+    public required string PlayerId { get; set; }
+    public required string DeviceId { get; set; }
+    public int Coins { get; set; } = 0;
+    public int Rolls { get; set; } = 0;
 }

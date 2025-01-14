@@ -36,7 +36,8 @@ public class PlayerStateService : IPlayerStateService
 
     public Player GetPlayerById(string playerId)
     {
-        return _players.Values.FirstOrDefault(p => p.PlayerId == playerId);
+        return _players.Values.FirstOrDefault(p => p.PlayerId == playerId)
+               ?? throw new Exception("Player not found.");
     }
 
     public int UpdateResources(string playerId, string resourceType, int resourceValue)
