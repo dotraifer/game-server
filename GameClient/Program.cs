@@ -23,18 +23,16 @@ public static class Program
         };
 
         await SendMessageAsync(clientWebSocket, loginRequest);
-
         var loginResponse = await ReceiveMessageAsync<LoginResponse>(clientWebSocket);
         var playerId = loginResponse.PlayerId;
 
-        loginRequest = new LoginRequest
+        var friendLoginRequest = new LoginRequest
         {
             ActionType = ActionType.Login,
             DeviceId = Guid.NewGuid()
         };
 
-        await SendMessageAsync(clientWebSocket, loginRequest);
-
+        await SendMessageAsync(clientWebSocket, friendLoginRequest);
         var friendLoginResponse = await ReceiveMessageAsync<LoginResponse>(clientWebSocket);
         var friendPlayerId = friendLoginResponse.PlayerId;
 
@@ -47,8 +45,7 @@ public static class Program
         };
 
         await SendMessageAsync(clientWebSocket, updateRequest);
-        
-        var updateResourceResponse = await ReceiveMessageAsync<UpdateResourceResponse>(clientWebSocket);
+        await ReceiveMessageAsync<UpdateResourceResponse>(clientWebSocket);
 
         var sendGiftRequest = new SendGiftRequest
         {
@@ -60,8 +57,7 @@ public static class Program
         };
 
         await SendMessageAsync(clientWebSocket, sendGiftRequest);
-        
-        var sendGiftResponse = await ReceiveMessageAsync<SendGiftResponse>(clientWebSocket);
+        await ReceiveMessageAsync<SendGiftResponse>(clientWebSocket);
         await clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
     }
 
