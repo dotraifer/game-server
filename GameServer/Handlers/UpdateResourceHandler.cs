@@ -4,6 +4,11 @@ using GameServer.Responses;
 
 namespace GameServer.Handlers;
 
+/// <summary>
+/// Handles the update resource request.
+/// </summary>
+/// <param name="request">The update resource request.</param>
+/// <param name="gameContext">The game context containing shared resources like logger and player state service.</param>
 public class UpdateResourceHandler(UpdateResourceRequest request,
     GameContext gameContext) : IHandler
 {

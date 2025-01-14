@@ -5,8 +5,18 @@ using GameServer.Requests;
 
 namespace GameServer;
 
+/// <summary>
+/// Factory class to create handler objects based on the action type in the message.
+/// </summary>
 public static class HandlerFactory
 {
+    /// <summary>
+    /// Creates an appropriate handler object based on the action type in the message.
+    /// </summary>
+    /// <param name="message">The JSON message containing the action type and request data.</param>
+    /// <param name="gameContext">The game context containing shared resources like logger and player state service.</param>
+    /// <returns>An instance of a class that implements the <see cref="IHandler"/> interface.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the action type is not recognized.</exception>
     public static IHandler CreateObject(string message, GameContext gameContext)
     {
         var json = JsonDocument.Parse(message);

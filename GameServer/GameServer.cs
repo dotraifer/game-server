@@ -1,5 +1,8 @@
 using System.Net;
 using System.Net.WebSockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GameServer;
 
@@ -27,25 +30,21 @@ public class GameServer(GameContext gameContext)
             }
         }
     }
+
     private async Task ProcessWebSocketRequest(HttpListenerContext context)
     {
         var webSocketContext = await context.AcceptWebSocketAsync(null);
         var socket = webSocketContext.WebSocket;
-
-        // Handle incoming messages
         var buffer = new byte[1024];
+
         while (socket.State == WebSocketState.Open)
         {
             var result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             if (result.MessageType == WebSocketMessageType.Text)
             {
-                var receivedMessage = System.Text.Encoding.UTF8.GetString(buffer, 0, result.Count);
+                var receivedMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
                 var processedMessage = await ProcessMessageAsync(receivedMessage);
-
-                // Echo back the received message
-                await socket.SendAsync(
-                    new ArraySegment<byte>(System.Text.Encoding.UTF8.GetBytes(processedMessage),
-                    0, processedMessage.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                await socket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(processedMessage)), WebSocketMessageType.Text, true, CancellationToken.None);
             }
             else if (result.MessageType == WebSocketMessageType.Close)
             {
@@ -53,16 +52,13 @@ public class GameServer(GameContext gameContext)
             }
         }
     }
-    
-    
+
     private async Task<string> ProcessMessageAsync(string message)
     {
         try
         {
-            // Parse JSON message
             var handler = HandlerFactory.CreateObject(message, gameContext);
-            var response  = await handler.HandleAsync();
-            return response;
+            return await handler.HandleAsync();
         }
         catch (Exception ex)
         {

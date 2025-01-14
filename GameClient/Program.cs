@@ -62,6 +62,7 @@ public static class Program
         await SendMessageAsync(clientWebSocket, sendGiftRequest);
         
         var sendGiftResponse = await ReceiveMessageAsync<SendGiftResponse>(clientWebSocket);
+        await clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
     }
 
     private static async Task SendMessageAsync(ClientWebSocket clientWebSocket, object message)
