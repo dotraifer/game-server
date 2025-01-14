@@ -7,36 +7,36 @@ namespace GameServer;
 
 public class PlayerStateService : IPlayerStateService
 {
-    private readonly ConcurrentDictionary<string, Player> Players = new();
-    private readonly ConcurrentDictionary<string, WebSocket> OnlinePlayers = new();
+    private readonly ConcurrentDictionary<string, Player> _players = new();
+    private readonly ConcurrentDictionary<string, WebSocket> _onlinePlayers = new();
 
-    public bool IsPlayerConnected(string deviceId) => Players.ContainsKey(deviceId);
+    public bool IsPlayerConnected(string deviceId) => _players.ContainsKey(deviceId);
 
     public string ConnectPlayer(string deviceId)
     {
         var playerId = Guid.NewGuid().ToString();
-        Players[deviceId] = new Player { PlayerId = playerId, DeviceId = deviceId };
+        _players[deviceId] = new Player { PlayerId = playerId, DeviceId = deviceId };
         return playerId;
     }
 
     public void AddOnlinePlayer(string playerId, WebSocket socket)
     {
-        OnlinePlayers[playerId] = socket;
+        _onlinePlayers[playerId] = socket;
     }
 
     public void RemovePlayer(string playerId)
     {
-        var entry = Players.FirstOrDefault(p => p.Value.PlayerId == playerId);
+        var entry = _players.FirstOrDefault(p => p.Value.PlayerId == playerId);
         if (!string.IsNullOrEmpty(entry.Key))
         {
-            Players.TryRemove(entry.Key, out _);
-            OnlinePlayers.TryRemove(playerId, out _);
+            _players.TryRemove(entry.Key, out _);
+            _onlinePlayers.TryRemove(playerId, out _);
         }
     }
 
     public Player GetPlayerById(string playerId)
     {
-        return Players.Values.FirstOrDefault(p => p.PlayerId == playerId);
+        return _players.Values.FirstOrDefault(p => p.PlayerId == playerId);
     }
 
     public int UpdateResources(string playerId, string resourceType, int resourceValue)
@@ -52,12 +52,12 @@ public class PlayerStateService : IPlayerStateService
 
     public bool IsPlayerOnline(string playerId)
     {
-        return OnlinePlayers.ContainsKey(playerId);
+        return _onlinePlayers.ContainsKey(playerId);
     }
 
     public void SendNotificationToPlayer(string playerId, string message)
     {
-        if (OnlinePlayers.TryGetValue(playerId, out var socket) && socket.State == WebSocketState.Open)
+        if (_onlinePlayers.TryGetValue(playerId, out var socket) && socket.State == WebSocketState.Open)
         {
             var messageBytes = Encoding.UTF8.GetBytes(message);
             socket.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true, CancellationToken.None)

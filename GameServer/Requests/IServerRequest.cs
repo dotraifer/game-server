@@ -1,6 +1,8 @@
-namespace GameServer;
+using GameServer.Models;
+
+namespace GameServer.Requests;
 
 public interface IServerRequest
 {
-    Type ActionType { get; set; }
+    ActionType ActionType { get; set; }
 }

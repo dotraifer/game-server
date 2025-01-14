@@ -1,11 +1,14 @@
 using GameServer.Models;
 
-namespace GameServer.Requests;
+namespace GameServer.Responses;
 
-public class UpdateResourceRequest : IServerRequest
+public record SendGiftResponse
 {
     public required string PlayerId { get; set; }
+    
+    public required string FriendPlayerId { get; set; }
+    
     public required ResourceType ResourceType { get; set; }
+    
     public required int Amount { get; set; }
-    public required ActionType ActionType { get; set; }
 }

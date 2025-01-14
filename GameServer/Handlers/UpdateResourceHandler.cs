@@ -1,4 +1,7 @@
 using System.Net.WebSockets;
+using System.Text.Json;
+using GameServer.Requests;
+using GameServer.Responses;
 
 namespace GameServer.Handlers;
 
@@ -12,6 +15,14 @@ public class UpdateResourceHandler(UpdateResourceRequest request,
 
         var newBalance = gameContext.PlayerStateService.
             UpdateResources(request.PlayerId, resourceType, resourceValue);
-        return Task.FromResult($"{{\"NewBalance\":{newBalance}}}");
+
+        var response = new UpdateResourceResponse()
+        {
+            NewBalance = newBalance
+        };
+        
+        var json = JsonSerializer.Serialize(response);
+        
+        return Task.FromResult(json);
     }
 }

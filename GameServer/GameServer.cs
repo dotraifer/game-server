@@ -12,7 +12,7 @@ public class GameServer(GameContext gameContext)
         listener.Prefixes.Add($"http://{ipAddress}:{port}/");
         listener.Start();
 
-        Console.WriteLine("Server started. Waiting for connections...");
+        gameContext.Logger.Information("Server started. Waiting for connections...");
 
         while (true)
         {
@@ -67,7 +67,7 @@ public class GameServer(GameContext gameContext)
         }
         catch (Exception ex)
         {
-            return "Error processing message.";
+            return $"Error processing message. {ex.Message}";
         }
     }
 }

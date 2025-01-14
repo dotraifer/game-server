@@ -1,9 +1,8 @@
 ﻿using Autofac;
-using GameServer;
-using GameServer.Handlers;
 using Serilog;
-using Serilog.Core;
 using Serilog.Events;
+
+namespace GameServer;
 
 public static class Program
 {
@@ -20,12 +19,12 @@ public static class Program
             .CreateLogger();
         
         builder.RegisterInstance(logger).As<ILogger>().SingleInstance();
-        builder.RegisterType<GameServer.GameServer>().AsSelf();
+        builder.RegisterType<global::GameServer.GameServer>().AsSelf();
         builder.RegisterInstance(playerStateService).
             As<IPlayerStateService>().SingleInstance();
         builder.RegisterInstance(new GameContext(logger, playerStateService)).AsSelf().SingleInstance();
         var container = builder.Build();
         await using var scope = container.BeginLifetimeScope();
-        await container.Resolve<GameServer.GameServer>().StartServer("127.0.0.1", 8000);
+        await container.Resolve<global::GameServer.GameServer>().StartServer("127.0.0.1", 8000);
     }
 }

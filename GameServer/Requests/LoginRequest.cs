@@ -1,7 +1,9 @@
-namespace GameServer;
+using GameServer.Models;
 
-public class LoginRequest : IServerRequest
+namespace GameServer.Requests;
+
+public record LoginRequest : IServerRequest
 {
-    public Guid DeviceId { get; set; }
-    public Type ActionType { get; set; }
+    public required Guid DeviceId { get; set; }
+    public required ActionType ActionType { get; set; }
 }

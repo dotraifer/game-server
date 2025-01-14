@@ -1,4 +1,8 @@
 using System.Net.WebSockets;
+using System.Text;
+using System.Text.Json;
+using GameServer.Requests;
+using GameServer.Responses;
 
 namespace GameServer.Handlers;
 
@@ -14,6 +18,13 @@ public class LoginHandler(LoginRequest request,
         }
 
         var playerId = gameContext.PlayerStateService.ConnectPlayer(deviceId.ToString());
-        return Task.FromResult($"{{\"PlayerId\":\"{playerId}\"}}");
+        var response = new LoginResponse
+        {
+            PlayerId = playerId
+        };
+        
+        var json = JsonSerializer.Serialize(response);
+        
+        return Task.FromResult(json);
     }
 }
