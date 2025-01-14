@@ -5,7 +5,7 @@ namespace GameServer.Responses;
 /// <summary>
 /// Represents the response for sending a gift to another player.
 /// </summary>
-public record SendGiftResponse
+public record SendGiftResponse : IServerResponse
 {
     /// <summary>
     /// Player ID of the sender.

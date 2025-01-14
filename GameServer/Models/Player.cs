@@ -1,6 +1,6 @@
 namespace GameServer.Models;
 
-public class Player
+public record Player
 {
     public required string PlayerId { get; set; }
     public required string DeviceId { get; set; }
