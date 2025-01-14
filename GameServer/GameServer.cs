@@ -20,17 +20,20 @@ public class GameServer(IGameContext gameContext)
         listener.Prefixes.Add($"http://{ipAddress}:{port}/");
         listener.Start();
 
-        gameContext.Logger.Information("Server started. Waiting for connections...");
+        gameContext.Logger.Information("Server started. Waiting for connections at {IpAddress}:{Port}",
+            ipAddress, port);
 
         while (true)
         {
             var context = await listener.GetContextAsync();
             if (context.Request.IsWebSocketRequest)
             {
+                gameContext.Logger.Information("WebSocket request received.");
                 await ProcessWebSocketRequest(context);
             }
             else
             {
+                gameContext.Logger.Warning("Non-WebSocket request received. Responding with 400 Bad Request.");
                 context.Response.StatusCode = 400;
                 context.Response.Close();
             }
@@ -43,6 +46,7 @@ public class GameServer(IGameContext gameContext)
     /// <param name="context">The HTTP listener context containing the WebSocket request.</param>
     private async Task ProcessWebSocketRequest(HttpListenerContext context)
     {
+        gameContext.Logger.Information("WebSocket connection established.");
         var webSocketContext = await context.AcceptWebSocketAsync(null);
         var socket = webSocketContext.WebSocket;
         var buffer = new byte[1024];
@@ -59,6 +63,7 @@ public class GameServer(IGameContext gameContext)
             else if (result.MessageType == WebSocketMessageType.Close)
             {
                 await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+                gameContext.Logger.Information("WebSocket connection closed.");
             }
         }
     }
@@ -70,7 +75,6 @@ public class GameServer(IGameContext gameContext)
     /// <returns>A task that represents the asynchronous operation. The task result contains the processed message response.</returns>
     private async Task<string> ProcessMessageAsync(string message)
     {
-        Console.WriteLine("CKDSC");
         try
         {
             var handler = HandlerFactory.CreateObject(message, gameContext);
@@ -78,6 +82,7 @@ public class GameServer(IGameContext gameContext)
         }
         catch (Exception ex)
         {
+            gameContext.Logger.Error("Error processing message.", ex);
             return $"Error processing message. {ex.Message}";
         }
     }
